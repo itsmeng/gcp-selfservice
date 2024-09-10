@@ -21,7 +21,8 @@ def create_service_account_key(project_id, service_account_email):
         return {
             "private_key": response.private_key_data,
             "key_id": response.name.split('/')[-1],
-            "service_account_email": service_account_email
+            "service_account_email": service_account_email,
+            "message": f"Access key for {name} created successfully"
         }
     except Exception as e:
         raise RuntimeError(f"Error creating service account key: {e}")
@@ -74,13 +75,13 @@ def enable_service_account_key(project_id, service_account_email, key_id):
         key_id (str): The ID of the key to enable.
     
     Returns:
-        bool: True if enabling was successful, False otherwise.
+        dict: A dictionary containing a message about the operation result.
     """
     try:
         client = iam_admin_v1.IAMClient()
         name = f"projects/{project_id}/serviceAccounts/{service_account_email}/keys/{key_id}"
         client.enable_service_account_key(name=name)
-        return True
+        return {"message": f"Successfully enabled key {key_id}"}
     except Exception as e:
         raise RuntimeError(f"Error enabling service account key: {e}")
 
@@ -94,13 +95,13 @@ def disable_service_account_key(project_id, service_account_email, key_id):
         key_id (str): The ID of the key to disable.
     
     Returns:
-        bool: True if disabling was successful, False otherwise.
+        dict: A dictionary containing a message about the operation result.
     """
     try:
         client = iam_admin_v1.IAMClient()
         name = f"projects/{project_id}/serviceAccounts/{service_account_email}/keys/{key_id}"
         client.disable_service_account_key(name=name)
-        return True
+        return {"message": f"Successfully disabled key {key_id}"}
     except Exception as e:
         raise RuntimeError(f"Error disabling service account key: {e}")
 
