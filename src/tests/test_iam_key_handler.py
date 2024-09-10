@@ -6,7 +6,7 @@ import os
 # Add the parent directory to the Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from service_account_key.iam_key_handler import handle_iam_key_action
+from src.iam_service_account_key_management.key_handler import handle_iam_key_action
 
 class TestIAMKeyHandler(unittest.TestCase):
 

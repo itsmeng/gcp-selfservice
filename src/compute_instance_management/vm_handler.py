@@ -30,7 +30,7 @@ def stop_vm(project: str, zone: str, instance: str) -> Dict[str, str]:
     """
     Stop a VM instance.
     
-    Args:
+    Args: 
         project (str): The GCP project ID.
         zone (str): The zone where the instance is located.
         instance (str): The name of the instance to stop.
