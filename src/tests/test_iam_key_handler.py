@@ -6,11 +6,11 @@ import os
 # Add the parent directory to the Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from src.iam_service_account_key_management.key_handler import handle_iam_key_action
+from iam_service_account_key_management.service_account_key_handler import handle_iam_key_action
 
 class TestIAMKeyHandler(unittest.TestCase):
 
-    @patch('service_account_key.iam_key_handler.create_service_account_key')
+    @patch('iam_service_account_key_management.service_account_key_handler.create_service_account_key')
     def test_create_service_account_key(self, mock_create):
         mock_create.return_value = {
             'private_key': b'private_key_data',
@@ -27,7 +27,7 @@ class TestIAMKeyHandler(unittest.TestCase):
         mock_create.assert_called_once_with('project_id', 'email@example.com')
         self.assertEqual(result, mock_create.return_value)
 
-    @patch('service_account_key.iam_key_handler.delete_service_account_key')
+    @patch('iam_service_account_key_management.service_account_key_handler.delete_service_account_key')
     def test_delete_service_account_key(self, mock_delete):
         mock_delete.return_value = True
 
@@ -41,7 +41,7 @@ class TestIAMKeyHandler(unittest.TestCase):
         mock_delete.assert_called_once_with('project_id', 'email@example.com', 'key_id')
         self.assertTrue(result)
 
-    @patch('service_account_key.iam_key_handler.rotate_service_account_key')
+    @patch('iam_service_account_key_management.service_account_key_handler.rotate_service_account_key')
     def test_rotate_service_account_key(self, mock_rotate):
         mock_rotate.return_value = {'new': 'key'}
 
@@ -55,7 +55,7 @@ class TestIAMKeyHandler(unittest.TestCase):
         mock_rotate.assert_called_once_with('project_id', 'email@example.com', 'key_id')
         self.assertEqual(result, {'new': 'key'})
 
-    @patch('service_account_key.iam_key_handler.enable_service_account_key')
+    @patch('iam_service_account_key_management.service_account_key_handler.enable_service_account_key')
     def test_enable_service_account_key(self, mock_enable):
         mock_enable.return_value = True
 
@@ -69,7 +69,7 @@ class TestIAMKeyHandler(unittest.TestCase):
         mock_enable.assert_called_once_with('project_id', 'email@example.com', 'key_id')
         self.assertTrue(result)
 
-    @patch('service_account_key.iam_key_handler.disable_service_account_key')
+    @patch('iam_service_account_key_management.service_account_key_handler.disable_service_account_key')
     def test_disable_service_account_key(self, mock_disable):
         mock_disable.return_value = True
 
