@@ -6,75 +6,90 @@ import os
 # Add the parent directory to the Python path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from service_account_key.iam_key_handler import (
-    create_service_account_key,
-    delete_service_account_key,
-    rotate_service_account_key,
-    enable_service_account_key,
-    disable_service_account_key
-)
+from service_account_key.iam_key_handler import handle_iam_key_action
 
 class TestIAMKeyHandler(unittest.TestCase):
 
-    @patch('service_account_key.iam_key_handler.iam_admin_v1.IAMClient')
-    def test_create_service_account_key(self, mock_iam_client):
-        mock_client = MagicMock()
-        mock_iam_client.return_value = mock_client
-        mock_response = MagicMock()
-        mock_response.private_key_data = b'private_key_data'
-        mock_response.name = 'projects/project_id/serviceAccounts/email@example.com/keys/key_id'
-        mock_client.create_service_account_key.return_value = mock_response
+    @patch('service_account_key.iam_key_handler.create_service_account_key')
+    def test_create_service_account_key(self, mock_create):
+        mock_create.return_value = {
+            'private_key': b'private_key_data',
+            'key_id': 'key_id',
+            'service_account_email': 'email@example.com'
+        }
 
-        result = create_service_account_key('project_id', 'email@example.com')
-        print(result)
+        result = handle_iam_key_action({
+            'action': 'create',
+            'project_id': 'project_id',
+            'service_account_email': 'email@example.com'
+        })
 
-        mock_client.create_service_account_key.assert_called_once_with(name='projects/project_id/serviceAccounts/email@example.com')
-        self.assertEqual(result['private_key'], b'private_key_data')
-        self.assertEqual(result['key_id'], 'key_id')
-        self.assertEqual(result['service_account_email'], 'email@example.com')
-
-    @patch('service_account_key.iam_key_handler.iam_admin_v1.IAMClient')
-    def test_delete_service_account_key(self, mock_iam_client):
-        mock_client = MagicMock()
-        mock_iam_client.return_value = mock_client
-
-        result = delete_service_account_key('project_id', 'email@example.com', 'key_id')
-
-        mock_client.delete_service_account_key.assert_called_once_with(name='projects/project_id/serviceAccounts/email@example.com/keys/key_id')
-        self.assertTrue(result)
+        mock_create.assert_called_once_with('project_id', 'email@example.com')
+        self.assertEqual(result, mock_create.return_value)
 
     @patch('service_account_key.iam_key_handler.delete_service_account_key')
-    @patch('service_account_key.iam_key_handler.create_service_account_key')
-    def test_rotate_service_account_key(self, mock_create, mock_delete):
+    def test_delete_service_account_key(self, mock_delete):
         mock_delete.return_value = True
-        mock_create.return_value = {'new': 'key'}
 
-        result = rotate_service_account_key('project_id', 'email@example.com', 'key_id')
+        result = handle_iam_key_action({
+            'action': 'delete',
+            'project_id': 'project_id',
+            'service_account_email': 'email@example.com',
+            'key_id': 'key_id'
+        })
 
         mock_delete.assert_called_once_with('project_id', 'email@example.com', 'key_id')
-        mock_create.assert_called_once_with('project_id', 'email@example.com')
+        self.assertTrue(result)
+
+    @patch('service_account_key.iam_key_handler.rotate_service_account_key')
+    def test_rotate_service_account_key(self, mock_rotate):
+        mock_rotate.return_value = {'new': 'key'}
+
+        result = handle_iam_key_action({
+            'action': 'rotate',
+            'project_id': 'project_id',
+            'service_account_email': 'email@example.com',
+            'key_id': 'key_id'
+        })
+
+        mock_rotate.assert_called_once_with('project_id', 'email@example.com', 'key_id')
         self.assertEqual(result, {'new': 'key'})
 
-    @patch('service_account_key.iam_key_handler.iam_admin_v1.IAMClient')
-    def test_enable_service_account_key(self, mock_iam_client):
-        mock_client = MagicMock()
-        mock_iam_client.return_value = mock_client
+    @patch('service_account_key.iam_key_handler.enable_service_account_key')
+    def test_enable_service_account_key(self, mock_enable):
+        mock_enable.return_value = True
 
-        result = enable_service_account_key('project_id', 'email@example.com', 'key_id')
+        result = handle_iam_key_action({
+            'action': 'enable',
+            'project_id': 'project_id',
+            'service_account_email': 'email@example.com',
+            'key_id': 'key_id'
+        })
 
-        mock_client.enable_service_account_key.assert_called_once_with(name='projects/project_id/serviceAccounts/email@example.com/keys/key_id')
+        mock_enable.assert_called_once_with('project_id', 'email@example.com', 'key_id')
         self.assertTrue(result)
 
-    @patch('service_account_key.iam_key_handler.iam_admin_v1.IAMClient')
-    def test_disable_service_account_key(self, mock_iam_client):
-        mock_client = MagicMock()
-        mock_iam_client.return_value = mock_client
+    @patch('service_account_key.iam_key_handler.disable_service_account_key')
+    def test_disable_service_account_key(self, mock_disable):
+        mock_disable.return_value = True
 
-        result = disable_service_account_key('project_id', 'email@example.com', 'key_id')
+        result = handle_iam_key_action({
+            'action': 'disable',
+            'project_id': 'project_id',
+            'service_account_email': 'email@example.com',
+            'key_id': 'key_id'
+        })
 
-
-        mock_client.disable_service_account_key.assert_called_once_with(name='projects/project_id/serviceAccounts/email@example.com/keys/key_id')
+        mock_disable.assert_called_once_with('project_id', 'email@example.com', 'key_id')
         self.assertTrue(result)
+
+    def test_invalid_action(self):
+        with self.assertRaises(ValueError):
+            handle_iam_key_action({
+                'action': 'invalid_action',
+                'project_id': 'project_id',
+                'service_account_email': 'email@example.com'
+            })
 
 if __name__ == '__main__':
     unittest.main()
